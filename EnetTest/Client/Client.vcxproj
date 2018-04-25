@@ -58,7 +58,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>opengl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;enet.lib;enetwrapper.lib;wsock32.lib;Ws2_32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
@@ -98,7 +98,6 @@
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="swalib\core.cpp" />
-    <ClCompile Include="swalib\example.cpp" />
     <ClCompile Include="swalib\font.cpp" />
     <ClCompile Include="swalib\lodepng.cpp" />
     <ClCompile Include="swalib\sys_win.cpp" />

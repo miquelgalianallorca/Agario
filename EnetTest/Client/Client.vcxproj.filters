@@ -6,9 +6,6 @@
     <ClCompile Include="swalib\core.cpp">
       <Filter>swalib</Filter>
     </ClCompile>
-    <ClCompile Include="swalib\example.cpp">
-      <Filter>swalib</Filter>
-    </ClCompile>
     <ClCompile Include="swalib\font.cpp">
       <Filter>swalib</Filter>
     </ClCompile>

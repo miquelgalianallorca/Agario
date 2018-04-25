@@ -80,7 +80,7 @@ bool WIN_InitInstance()
   }
   RECT r; r.left = 0; r.right = SCR_WIDTH; r.top = 0; r.bottom = SCR_HEIGHT;
   AdjustWindowRect(&r, dwStyle, FALSE);
-  WIN_hWnd = CreateWindowEx(dwExStyle, "WIN_WindowClass", "Coldline", dwStyle,
+  WIN_hWnd = CreateWindowEx(dwExStyle, "WIN_WindowClass", "Agario", dwStyle,
           0, 0, r.right-r.left, r.bottom-r.top, NULL, NULL, WIN_hInst, NULL);
 
   if (!WIN_hWnd)
