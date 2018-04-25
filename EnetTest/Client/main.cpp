@@ -1,3 +1,6 @@
+
+// ================== CLIENT MAIN ================== \\
+
 #include "stdafx.h"
 
 #include "swalib/sys.h"
@@ -24,8 +27,7 @@ void SetupEngine() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-int Main(void)
-{
+int Main(void) {
 	SetupEngine();
 
 	Game game;

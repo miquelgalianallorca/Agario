@@ -1,12 +1,13 @@
 #include "Game.h"
 #include "stdafx.h"
 
-using namespace ENet;
+#define PORT 1234
+#define CHANNELS 2
 
 Game::Game() {
 	pClient = new CClienteENet();
 	pClient->Init();
-	pPeer = pClient->Connect("127.0.0.1", 1234, 2);
+	pPeer = pClient->Connect("127.0.0.1", PORT, CHANNELS);
 	pClient->Service(incomingPackets, 0);
 	pClient->SendData(pPeer, "pepe", 4, 0, false);
 }
