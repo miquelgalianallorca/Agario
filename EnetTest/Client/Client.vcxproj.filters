@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Client.cpp" />
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="swalib\core.cpp">
+      <Filter>swalib</Filter>
+    </ClCompile>
+    <ClCompile Include="swalib\example.cpp">
+      <Filter>swalib</Filter>
+    </ClCompile>
+    <ClCompile Include="swalib\font.cpp">
+      <Filter>swalib</Filter>
+    </ClCompile>
+    <ClCompile Include="swalib\lodepng.cpp">
+      <Filter>swalib</Filter>
+    </ClCompile>
+    <ClCompile Include="swalib\sys_win.cpp">
+      <Filter>swalib</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="swalib\core.h">
+      <Filter>swalib</Filter>
+    </ClInclude>
+    <ClInclude Include="swalib\font.h">
+      <Filter>swalib</Filter>
+    </ClInclude>
+    <ClInclude Include="swalib\lodepng.h">
+      <Filter>swalib</Filter>
+    </ClInclude>
+    <ClInclude Include="swalib\sys.h">
+      <Filter>swalib</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="swalib">
+      <UniqueIdentifier>{ddc3a180-83a9-4d8f-8d8c-b451b016445d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
