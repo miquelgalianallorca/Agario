@@ -15,6 +15,7 @@
     <ClCompile Include="swalib\sys_win.cpp">
       <Filter>swalib</Filter>
     </ClCompile>
+    <ClCompile Include="Game.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -31,6 +32,7 @@
     <ClInclude Include="swalib\sys.h">
       <Filter>swalib</Filter>
     </ClInclude>
+    <ClInclude Include="Game.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="swalib">

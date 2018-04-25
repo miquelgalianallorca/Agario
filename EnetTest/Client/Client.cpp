@@ -7,6 +7,8 @@
 #include "ClientENet.h"
 #include <Windows.h>
 
+#include "Game.h"
+
 using namespace ENet;
 
 void SetupEngine() {
@@ -26,31 +28,19 @@ int Main(void)
 {
 	SetupEngine();
 
-    CClienteENet* pClient = new CClienteENet();
-    pClient->Init();
-
-    CPeerENet* pPeer = pClient->Connect("127.0.0.1", 1234, 2);
-
-    std::vector<CPacketENet*>  incomingPackets;
-    pClient->Service(incomingPackets, 0);
-    Sleep(100);
-    pClient->SendData(pPeer, "pepe", 4, 0, false);
-    while (true)
-    {
+	Game game;
+    while (!SYS_GottaQuit()) {
 		glClear(GL_COLOR_BUFFER_BIT);
 
-        std::vector<CPacketENet*>  incommingPackets;
-        pClient->Service(incommingPackets, 0);
-        //Sleep(100);
-
+		game.Update();		
+		game.Render();
+		
 		SYS_Show();
-		// Keep system running
 		SYS_Pump();
 		SYS_Sleep(17);
     }
 
-    pClient->Disconnect(pPeer);
-
+	FONT_End();
     return 0;
 }
 

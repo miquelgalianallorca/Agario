@@ -11,8 +11,8 @@ int _tmain(int argc, _TCHAR* argv[])
     {
         while (true)
         {
-            std::vector<CPacketENet*>  incommingPackets;
-            pServer->Service(incommingPackets, 0);
+            std::vector<CPacketENet*>  incomingPackets;
+            pServer->Service(incomingPackets, 0);
             Sleep(100);
         }
     }
