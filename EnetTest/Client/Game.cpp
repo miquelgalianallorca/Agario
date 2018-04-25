@@ -18,7 +18,7 @@ Game::~Game() {
 }
 
 void Game::Update() {
-	std::vector<CPacketENet*>  incomingPackets;
+	std::vector<CPacketENet*> incomingPackets;
 	pClient->Service(incomingPackets, 0);
 }
 

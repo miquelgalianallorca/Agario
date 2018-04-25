@@ -7,6 +7,10 @@ using namespace ENet;
 
 class Server {
 public:
+	class Ball {
+
+	};
+
 	Server();
 	~Server();
 
@@ -15,4 +19,5 @@ public:
 
 private:
 	CServerENet * pServer;
+	std::vector<Ball*> balls;
 };
