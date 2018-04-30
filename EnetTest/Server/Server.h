@@ -7,8 +7,11 @@ using namespace ENet;
 
 class Server {
 public:
-	class Ball {
-
+	struct Ball {
+		Ball(float _x, float _y, float _rad) : posX(_x), posY(_y), radius(_rad) {}
+		float posX;
+		float posY;
+		float radius;
 	};
 
 	Server();
@@ -20,4 +23,6 @@ public:
 private:
 	CServerENet * pServer;
 	std::vector<Ball*> balls;
+
+	std::vector<CPeerENet*> peers;
 };
