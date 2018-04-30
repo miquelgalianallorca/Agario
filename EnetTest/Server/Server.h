@@ -1,19 +1,14 @@
 #pragma once
 
 #include "ServerENet.h"
+#include "AgarioData.h"
 #include <Windows.h>
 
 using namespace ENet;
 
-class Server {
+class Server
+{
 public:
-	struct Ball {
-		Ball(float _x, float _y, float _rad) : posX(_x), posY(_y), radius(_rad) {}
-		float posX;
-		float posY;
-		float radius;
-	};
-
 	Server();
 	~Server();
 
@@ -22,7 +17,13 @@ public:
 
 private:
 	CServerENet * pServer;
-	std::vector<Ball*> balls;
+	std::vector<Ball> balls;
 
 	std::vector<CPeerENet*> peers;
+
+	void SendWorld(CPeerENet* peer);
+	void UpdateClients();
+	
+	size_t updateRateT;
+	size_t elapsedUpdateT;
 };

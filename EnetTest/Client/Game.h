@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ClientENet.h"
+#include "AgarioData.h"
 #include <Windows.h>
 
 using namespace ENet;
@@ -16,5 +17,7 @@ public:
 private:
 	CClienteENet* pClient;
 	CPeerENet*    pPeer;
-	std::vector<CPacketENet*>  incomingPackets;
+
+	std::vector<Ball> balls;
+	unsigned int ballTexture;
 };

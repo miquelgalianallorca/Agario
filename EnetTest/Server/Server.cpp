@@ -9,20 +9,20 @@
 #define CLIENTS 5
 
 #define STARTING_BALLS 20
+#define DELTA_TIME 100
 
 using std::cout;
 using std::endl;
 
-Server::Server() {
+Server::Server() : updateRateT(1000), elapsedUpdateT(0) {
 	pServer = new CServerENet();
 
 	// Load starting balls
 	std::srand((unsigned int)std::time(nullptr));
-	for (size_t i = 0; i < STARTING_BALLS; ++i)
-	{
+	for (size_t i = 0; i < STARTING_BALLS; ++i)	{
 		float posX = (float)(std::rand() % 100);
 		float posY = (float)(std::rand() % 100);
-		balls.push_back(new Ball(posX, posY, 10.f));
+		balls.push_back(Ball(posX, posY, 10.f));
 	}
 }
 
@@ -38,16 +38,14 @@ void Server::Update() {
 	std::vector<CPacketENet*>  incomingPackets;
 	pServer->Service(incomingPackets, 0);
 	
-	for (auto packet : incomingPackets)
-	{
-		if (packet->GetType() == EPacketType::CONNECT)
-		{
-			// Cada paquete lleva la informacion de su Peer
-			// como en UDP
+	for (auto packet : incomingPackets)	{
+		if (packet->GetType() == EPacketType::CONNECT) {
+			// Each packet has owner Peer (UDP)
 			peers.push_back(packet->GetPeer());
+			// Send snapshot of the world to the client
+			SendWorld(packet->GetPeer());
 		}
-		else if (packet->GetType() == EPacketType::DATA)
-		{
+		else if (packet->GetType() == EPacketType::DATA) {
 			size_t dataLength = packet->GetDataLength();
 			cout << dataLength << endl;
 
@@ -56,8 +54,7 @@ void Server::Update() {
 			buffer[dataLength] = '\0';
 			cout << buffer << endl;
 		}
-		else if (packet->GetType() == EPacketType::DISCONNECT)
-		{
+		else if (packet->GetType() == EPacketType::DISCONNECT) {
 			// Remove client
 			peers.erase(std::remove(peers.begin(), peers.end(), packet->GetPeer()), peers.end());
 			pServer->Disconnect(packet->GetPeer());
@@ -66,7 +63,23 @@ void Server::Update() {
 	}
 
 	// Write to all peers
-	pServer->SendAll("AA", 2, 0, false);
+	UpdateClients();
+}
 
-	Sleep(100);
+void Server::SendWorld(CPeerENet* peer) {
+	MsgWorld *msg = new MsgWorld();
+	msg->balls = balls;
+
+	pServer->SendData(peer, msg, sizeof(msg), 1, true);
+	
+	delete msg;
+}
+
+void Server::UpdateClients() {
+	if (elapsedUpdateT >= updateRateT) {
+		elapsedUpdateT = 0;
+		//pServer->SendAll("AA", 2, 0, false);
+	}
+	else elapsedUpdateT += DELTA_TIME;
+	Sleep(DELTA_TIME);
 }
