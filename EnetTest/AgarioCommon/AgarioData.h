@@ -12,11 +12,11 @@ struct Ball {
 };
 
 // Messages ================================================================
-//enum class MsgType { WORLD, UPDATE };
+enum class MsgType { WORLD, UPDATE };
 
-struct Msg {};
-
-struct MsgWorld : public Msg {
-	std::vector<Ball> balls;
-};
+//struct Msg {};
+//
+//struct MsgWorld : public Msg {
+//	std::vector<Ball> balls;
+//};
 // =========================================================================

@@ -1,5 +1,6 @@
 #include "Server.h"
 #include "stdafx.h"
+#include "Buffer.h"
 
 #include <algorithm>
 #include <iostream>
@@ -67,12 +68,20 @@ void Server::Update() {
 }
 
 void Server::SendWorld(CPeerENet* peer) {
-	MsgWorld *msg = new MsgWorld();
-	msg->balls = balls;
-
-	pServer->SendData(peer, msg, sizeof(msg), 1, true);
-	
-	delete msg;
+    CBuffer* buffer = new CBuffer();
+    // Type
+    MsgType msgType = MsgType::WORLD;
+    buffer->Write(&msgType, sizeof(MsgType));	
+    // Balls
+    size_t numBalls = balls.size();
+    buffer->Write(&numBalls, sizeof(size_t));
+    for (auto ball : balls) {
+        buffer->Write(&ball, sizeof(Ball));
+    }
+    // Send
+    buffer->GotoStart();
+    pServer->SendData(peer, buffer->GetBytes(),
+        buffer->GetSize(), 1, true);
 }
 
 void Server::UpdateClients() {

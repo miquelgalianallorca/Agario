@@ -5,6 +5,7 @@
 #include <Windows.h>
 
 using namespace ENet;
+class CBuffer;
 
 class Game {
 public:
@@ -15,6 +16,8 @@ public:
 	void Render();
 
 private:
+    void ParseWorldMsg(CBuffer* buffer);
+
 	CClienteENet* pClient;
 	CPeerENet*    pPeer;
 

@@ -1,5 +1,6 @@
 #include "Game.h"
 #include "stdafx.h"
+#include "Buffer.h"
 #include "swalib\sys.h"
 #include "swalib\core.h"
 #include <iostream>
@@ -30,21 +31,18 @@ Game::~Game() {
 void Game::Update() {
 	std::vector<CPacketENet*> incomingPackets;
 	pClient->Service(incomingPackets, 0);
-
 	for (auto packet : incomingPackets)	{
 		if (packet->GetType() == EPacketType::DATA)	{
-			byte* data = packet->GetData();
-			cout << data << endl;
-			// no reinterpret casts!
-			// hace falta una clase base msg con un enum msgType (4 bytes)
-			// luego hay clases hijas que se serializan para hacer un chorizo de bytes
-			// del resto de la informacion.
-			// (todas tienen en comun que los 4 primeros son el tipo
-			// segun el tipo deserializas el resto de la informacion.
-			/*if (auto msg = reinterpret_cast<MsgWorld*>(data))
-			{
-				int i = 0;
-			}*/
+			// Fill buffer with received data
+            CBuffer* buffer = new CBuffer();
+            buffer->Write(packet->GetData(), packet->GetDataLength());
+            buffer->GotoStart();
+
+            // Deserialize according to msgType
+            MsgType msgType;
+            buffer->Read(&msgType, sizeof(MsgType));
+            if (msgType == MsgType::WORLD)
+                ParseWorldMsg(buffer);
 		}
 	}
 
@@ -56,4 +54,14 @@ void Game::Render() {
 		CORE_RenderCenteredRotatedSprite(vmake(ball.posX, ball.posY),
 			vmake(ball.radius, ball.radius), 0.f, ballTexture);
 	}
+}
+
+void Game::ParseWorldMsg(CBuffer* buffer) {
+    size_t numBalls;
+    buffer->Read(&numBalls, sizeof(size_t));
+    for (size_t i = 0; i<numBalls; ++i) {
+        Ball ball(0,0,0);
+        buffer->Read(&ball, sizeof(Ball));
+        balls.push_back(ball);
+    }
 }
