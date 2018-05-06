@@ -21,9 +21,9 @@ Server::Server() : updateRateT(1000), elapsedUpdateT(0) {
 	// Load starting balls
 	std::srand((unsigned int)std::time(nullptr));
 	for (size_t i = 0; i < STARTING_BALLS; ++i)	{
-		float posX = (float)(std::rand() % 100);
-		float posY = (float)(std::rand() % 100);
-		balls.push_back(Ball(posX, posY, 10.f));
+		float posX = (float)(std::rand() % 1000);
+		float posY = (float)(std::rand() % 1000);
+		balls.push_back(Ball(posX, posY, 30.f));
 	}
 }
 
