@@ -16,9 +16,10 @@ Game::Game() {
 	pClient->Init();
 	pPeer = pClient->Connect("127.0.0.1", PORT, CHANNELS);
 	pClient->SendData(pPeer, "pepe", 4, 0, false);
-
-	ballTexture = CORE_LoadPNG("../data/ball.png", false);
-	//balls.push_back(Ball(100.f, 100.f, 100.f)); //test
+	
+	ballTexture   = CORE_LoadPNG("../data/greyball.png", false);
+	playerTexture = CORE_LoadPNG("../data/greenball.png", false);
+	enemyTexture  = CORE_LoadPNG("../data/yellowball.png", false);
 }
 
 Game::~Game() {
@@ -26,6 +27,8 @@ Game::~Game() {
 	delete pClient;
 
 	CORE_UnloadPNG(ballTexture);
+	CORE_UnloadPNG(playerTexture);
+	CORE_UnloadPNG(enemyTexture);
 }
 
 void Game::Update() {
@@ -41,8 +44,13 @@ void Game::Update() {
             // Deserialize according to msgType
             MsgType msgType;
             buffer->Read(&msgType, sizeof(MsgType));
-            if (msgType == MsgType::WORLD)
-                ParseWorldMsg(buffer);
+			if (msgType == MsgType::WORLD) {
+				ParseWorldMsg(buffer);
+			}
+			else if (msgType == MsgType::UPDATE) {
+				balls.clear();
+				ParseWorldMsg(buffer);
+			}
 		}
 	}
 
@@ -51,8 +59,14 @@ void Game::Update() {
 
 void Game::Render() {
 	for (auto ball : balls) {
+		// Players in another color
+		unsigned int texture = ballTexture;
+		if (ball.type == BallType::PLAYER) {
+			texture = playerTexture;
+		}
+		// Draw
 		CORE_RenderCenteredRotatedSprite(vmake(ball.posX, ball.posY),
-			vmake(ball.radius, ball.radius), 0.f, ballTexture);
+			vmake(ball.radius, ball.radius), 0.f, texture);
 	}
 }
 
@@ -60,7 +74,7 @@ void Game::ParseWorldMsg(CBuffer* buffer) {
     size_t numBalls;
     buffer->Read(&numBalls, sizeof(size_t));
     for (size_t i = 0; i<numBalls; ++i) {
-        Ball ball(0,0,0);
+        Ball ball(0, 0, 0, BallType::FOOD);
         buffer->Read(&ball, sizeof(Ball));
         balls.push_back(ball);
     }

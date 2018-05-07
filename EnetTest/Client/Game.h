@@ -22,5 +22,8 @@ private:
 	CPeerENet*    pPeer;
 
 	std::vector<Ball> balls;
-	unsigned int ballTexture;
+
+	unsigned int ballTexture;   // Food balls
+	unsigned int playerTexture; // Client ball
+	unsigned int enemyTexture;  // Other clients
 };

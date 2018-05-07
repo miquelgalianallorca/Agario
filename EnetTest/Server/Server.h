@@ -6,9 +6,16 @@
 
 using namespace ENet;
 
-class Server
-{
+class CBuffer;
+
+class Server {
 public:
+	struct Client {
+		Client(CPeerENet* _peer, Ball* _ball) : peer(_peer), ball(_ball) {}
+		CPeerENet* peer;
+		Ball* ball;
+	};
+	
 	Server();
 	~Server();
 
@@ -16,11 +23,11 @@ public:
 	void Update();
 
 private:
-	CServerENet * pServer;
-	std::vector<Ball> balls;
+	CServerENet* pServer;
+	std::vector<Ball*> balls;
+	std::vector<Client> clients;
 
-	std::vector<CPeerENet*> peers;
-
+	CBuffer* SerializeWorld(MsgType msgType);
 	void SendWorld(CPeerENet* peer);
 	void UpdateClients();
 	
