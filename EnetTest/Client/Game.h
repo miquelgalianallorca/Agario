@@ -16,7 +16,8 @@ public:
 	void Render();
 
 private:
-    void ParseWorldMsg(CBuffer* buffer);
+    void DeserializeWorld(CBuffer* buffer);
+	CBuffer* SerializeMousePos();
 
 	CClienteENet* pClient;
 	CPeerENet*    pPeer;

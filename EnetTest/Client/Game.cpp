@@ -32,6 +32,7 @@ Game::~Game() {
 }
 
 void Game::Update() {
+	// Receive messages =============================================
 	std::vector<CPacketENet*> incomingPackets;
 	pClient->Service(incomingPackets, 0);
 	for (auto packet : incomingPackets)	{
@@ -45,14 +46,23 @@ void Game::Update() {
             MsgType msgType;
             buffer->Read(&msgType, sizeof(MsgType));
 			if (msgType == MsgType::WORLD) {
-				ParseWorldMsg(buffer);
+				DeserializeWorld(buffer);
 			}
 			else if (msgType == MsgType::UPDATE) {
 				balls.clear();
-				ParseWorldMsg(buffer);
+				DeserializeWorld(buffer);
 			}
+
+			delete buffer;
 		}
 	}
+	// =============================================================
+
+	// Send messages ===============================================
+	CBuffer* buffer = SerializeMousePos();
+	pClient->SendData(pPeer, buffer->GetBytes(), buffer->GetSize(), 0, false);
+	delete buffer;
+	// =============================================================
 
 	Sleep(100);
 }
@@ -70,7 +80,7 @@ void Game::Render() {
 	}
 }
 
-void Game::ParseWorldMsg(CBuffer* buffer) {
+void Game::DeserializeWorld(CBuffer* buffer) {
     size_t numBalls;
     buffer->Read(&numBalls, sizeof(size_t));
     for (size_t i = 0; i<numBalls; ++i) {
@@ -78,4 +88,20 @@ void Game::ParseWorldMsg(CBuffer* buffer) {
         buffer->Read(&ball, sizeof(Ball));
         balls.push_back(ball);
     }
+}
+
+CBuffer* Game::SerializeMousePos() {
+	CBuffer* buffer = new CBuffer();
+
+	MsgType msgType = MsgType::MOVE;
+	buffer->Write(&msgType, sizeof(MsgType));
+
+	ivec2 mousePos = SYS_MousePos();
+	float posX = (float)mousePos.x;
+	float posY = (float)mousePos.y;
+	buffer->Write(&posX, sizeof(float));
+	buffer->Write(&posX, sizeof(float));
+
+	buffer->GotoStart();
+	return buffer;
 }

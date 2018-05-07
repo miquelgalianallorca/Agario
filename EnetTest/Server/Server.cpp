@@ -47,29 +47,24 @@ void Server::Update() {
 	
 	for (auto packet : incomingPackets)	{
 		if (packet->GetType() == EPacketType::CONNECT) {
-			Ball* ball = new Ball(STARTPOSX, STARTPOSY, BALLSIZE, BallType::PLAYER);
-			// Each packet has owner Peer (UDP)
-			clients.push_back(Client(packet->GetPeer(), ball));
-			balls.push_back(ball);
-			// Send snapshot of the world to the client
-			SendWorld(packet->GetPeer());
+			AddClient(packet->GetPeer());
 		}
 		else if (packet->GetType() == EPacketType::DATA) {
-			size_t dataLength = packet->GetDataLength();
-			cout << dataLength << endl;
+			CBuffer* buffer = new CBuffer();
+			buffer->Write(packet->GetData(), packet->GetDataLength());
+			buffer->GotoStart();
 
-			char *buffer = new char[dataLength + 1];
-			memcpy(buffer, packet->GetData(), dataLength);
-			buffer[dataLength] = '\0';
-			cout << buffer << endl;
+			// Deserialize data according to msg type
+			MsgType msgType;
+			buffer->Read(&msgType, sizeof(MsgType));
+			if (msgType == MsgType::MOVE) {
+				DeserializeMousePos(packet->GetPeer(), buffer);
+			}
+
+			delete buffer;
 		}
 		else if (packet->GetType() == EPacketType::DISCONNECT) {
-			// Remove client
-			CPeerENet* peer = packet->GetPeer();
-			clients.erase(std::remove_if(clients.begin(), clients.end(),
-				[peer](Client &c) { return c.peer == peer; }), clients.end());
-			
-			pServer->Disconnect(packet->GetPeer());
+			RemoveClient(packet->GetPeer());
 		}
 	}
 
@@ -109,4 +104,38 @@ void Server::UpdateClients() {
 		pServer->SendAll(buffer->GetBytes(), buffer->GetSize(), 0, false);
 	}
 	else elapsedUpdateT += DELTA_TIME;
+}
+
+void Server::AddClient(CPeerENet* peer) {
+	Ball* ball = new Ball(STARTPOSX, STARTPOSY, BALLSIZE, BallType::PLAYER);
+	// Each packet has owner Peer (UDP)
+	clients.push_back(Client(peer, ball));
+	balls.push_back(ball);
+	// Send snapshot of the world to the client
+	SendWorld(peer);
+}
+
+void Server::RemoveClient(CPeerENet* peer) {
+	clients.erase(std::remove_if(clients.begin(), clients.end(),
+		[peer](Client &c) { return c.peer == peer; }), clients.end());
+	pServer->Disconnect(peer);
+}
+
+void Server::DeserializeMousePos(CPeerENet* peer, CBuffer* buffer) {
+	float destX = 0.f;
+	float destY = 0.f;
+	buffer->Read(&destX, sizeof(float));
+	buffer->Read(&destY, sizeof(float));
+
+	// Find that player
+	auto it = std::find_if(clients.begin(), clients.end(),
+		[peer](Client &c) { return c.peer = peer; });
+	
+	// Move him
+	float posX = it->ball->posX;
+	float posY = it->ball->posY;
+	float velX = destX - posX; //Falta normalizar y multiplicar por velocidad
+	float velY = destY - posY;
+	it->ball->posX += velX;
+	it->ball->posY += velY;
 }

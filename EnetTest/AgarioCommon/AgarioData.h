@@ -21,4 +21,4 @@ struct Ball {
 };
 
 // Identify byte buffers
-enum class MsgType { WORLD, UPDATE };
+enum class MsgType { WORLD, UPDATE, MOVE };
