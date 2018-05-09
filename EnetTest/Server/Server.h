@@ -11,9 +11,10 @@ class CBuffer;
 class Server {
 public:
 	struct Client {
-		Client(CPeerENet* _peer, Ball* _ball) : peer(_peer), ball(_ball) {}
+		Client(CPeerENet* _peer, Ball* _ball, size_t _ID);
 		CPeerENet* peer;
 		Ball* ball;
+		size_t ID;
 	};
 	
 	Server();
@@ -32,6 +33,8 @@ private:
 
 	CBuffer* SerializeWorld(MsgType msgType);
 	void SendWorld(CPeerENet* peer);
+	void SendID(CPeerENet* peer, size_t ID);
+	//void UpdateBalls();
 	void UpdateClients();
 	void DeserializeMousePos(CPeerENet* peer, CBuffer* buffer);
 	

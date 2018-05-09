@@ -11,7 +11,9 @@
 using std::cout;
 using std::endl;
 
-Game::Game() {
+Game::Game() :
+	ID(0)
+{
 	pClient = new CClienteENet();
 	pClient->Init();
 	pPeer = pClient->Connect("127.0.0.1", PORT, CHANNELS);
@@ -52,6 +54,9 @@ void Game::Update() {
 				balls.clear();
 				DeserializeWorld(buffer);
 			}
+			else if (msgType == MsgType::ID) {
+				buffer->Read(&ID, sizeof(size_t));
+			}
 
 			delete buffer;
 		}
@@ -72,8 +77,10 @@ void Game::Render() {
 		// Players in another color
 		unsigned int texture = ballTexture;
 		if (ball.type == BallType::PLAYER) {
-			texture = playerTexture;
+			texture = enemyTexture;
+			if (ball.playerID == ID) texture = playerTexture;
 		}
+		
 		// Draw
 		CORE_RenderCenteredRotatedSprite(vmake(ball.posX, ball.posY),
 			vmake(ball.radius, ball.radius), 0.f, texture);
@@ -84,7 +91,7 @@ void Game::DeserializeWorld(CBuffer* buffer) {
     size_t numBalls;
     buffer->Read(&numBalls, sizeof(size_t));
     for (size_t i = 0; i<numBalls; ++i) {
-        Ball ball(0, 0, 0, BallType::FOOD);
+        Ball ball(0, 0, 0, 0.f, BallType::FOOD);
         buffer->Read(&ball, sizeof(Ball));
         balls.push_back(ball);
     }
@@ -96,11 +103,13 @@ CBuffer* Game::SerializeMousePos() {
 	MsgType msgType = MsgType::MOVE;
 	buffer->Write(&msgType, sizeof(MsgType));
 
+	buffer->Write(&ID, sizeof(ID));
+
 	ivec2 mousePos = SYS_MousePos();
 	float posX = (float)mousePos.x;
 	float posY = (float)mousePos.y;
 	buffer->Write(&posX, sizeof(float));
-	buffer->Write(&posX, sizeof(float));
+	buffer->Write(&posY, sizeof(float));
 
 	buffer->GotoStart();
 	return buffer;

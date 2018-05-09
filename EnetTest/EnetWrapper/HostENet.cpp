@@ -69,8 +69,8 @@ void CHostENet::SendData(CPeerENet* pPeer, void* data, int longData, int channel
 
     enet_peer_send(pPeer->GetENetPeer(), channel, packet);
 
-    if (DEBUG_ENET)
-        fprintf (stdout, "Packet send ");
+    //if (DEBUG_ENET)
+    //    fprintf (stdout, "Packet send ");
     enet_host_flush(m_Host);
 }
 

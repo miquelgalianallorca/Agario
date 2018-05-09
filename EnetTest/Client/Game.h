@@ -22,6 +22,7 @@ private:
 	CClienteENet* pClient;
 	CPeerENet*    pPeer;
 
+	size_t ID;
 	std::vector<Ball> balls;
 
 	unsigned int ballTexture;   // Food balls
