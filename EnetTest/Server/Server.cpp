@@ -155,14 +155,16 @@ void Server::AddClient(CPeerENet* peer) {
 	SendWorld(peer);
 }
 
-// TO DO: remove client by id, not by peer
 void Server::RemoveClient(CPeerENet* peer) {
-	// Remove from clients
-	clients.erase(std::remove_if(clients.begin(), clients.end(),
-		[peer](Client &c) { return c.peer == peer; }), clients.end());
+	auto client = std::find_if(clients.begin(), clients.end(),
+		[peer](Client &c) { return c.peer == peer; });
 	
-	// Remove from balls
-	// ...
+	size_t ID = client->ID;
+	auto ball = std::find_if(balls.begin(), balls.end(),
+		[ID](Ball *b) { return b->playerID == ID; });
+	
+	balls.erase(ball);
+	clients.erase(client);
 }
 
 void Server::DeserializeMousePos(CPeerENet* peer, CBuffer* buffer) {
