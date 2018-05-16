@@ -104,7 +104,7 @@ void Server::UpdateBalls() {
 		for (auto ball2 : balls) {
 			if (ball1 != ball2)	{
 				float dist = Distance(ball1->posX, ball1->posY, ball2->posX, ball2->posY);
-				if (dist < ball1->radius + ball2->radius) {
+				if (dist < Min(ball1->radius, ball2->radius)) {
 					// One is a player
 					if (ball1->playerID != 0 || ball2->playerID != 0) {
 						// Mark food as dead

@@ -69,7 +69,7 @@ void Game::Update() {
 	delete buffer;
 	// =============================================================
 
-	//Sleep(10);
+	Sleep(10);
 }
 
 void Game::Render() {
