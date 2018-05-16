@@ -22,7 +22,6 @@ struct Ball {
 	float speed;
 	BallType type;
 	size_t playerID;
-	//bool isAlive;
 };
 
 // Identify byte buffers
@@ -34,4 +33,8 @@ inline float Distance(float aX, float aY, float bX, float bY) {
 
 	float dist = sqrtf(vX * vX + vY * vY);
 	return dist;
+}
+
+inline float Max(float a, float b) {
+	return a > b ? a : b;
 }

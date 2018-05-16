@@ -10,13 +10,13 @@
 #define CLIENTS 5
 
 #define STARTING_BALLS 20
-#define DELTA_TIME 100
+#define DELTA_TIME 10
 #define INIT_PLAYER_SPEED 5
 
 using std::cout;
 using std::endl;
 
-Server::Server() : updateRateT(1000), elapsedUpdateT(0) {
+Server::Server() : updateRateT(20), elapsedUpdateT(0) {
 	pServer = new CServerENet();
 
 	// Load starting balls
@@ -70,6 +70,7 @@ void Server::Update() {
 	}
 
 	// Write to all peers
+	UpdateBalls();
 	UpdateClients();
 	Sleep(DELTA_TIME);
 }
@@ -96,34 +97,37 @@ void Server::SendWorld(CPeerENet* peer) {
     pServer->SendData(peer, buffer->GetBytes(), buffer->GetSize(), 1, true);
 }
 
-//void Server::UpdateBalls() {
-//	// Collisions
-//	//for (auto ball1 : balls) {
-//	//	for (auto ball2 : balls) {
-//	//		float dist = Distance(ball1->posX, ball1->posY, ball2->posX, ball2->posY);
-//	//		if (dist < ball1->radius + ball2->radius) {
-//	//			// One is a player
-//	//			if (ball1->playerID != 0 || ball2->playerID != 0) {
-//	//				// Mark food as dead
-//	//				if (ball1->playerID == 0) {
-//	//					ball1->isAlive = false;
-//	//					ball2->radius += 10;
-//	//				}
-//	//				else if (ball2->playerID == 0) {
-//	//					ball2->isAlive = false;
-//	//					ball2->radius += 10;
-//	//				}
-//	//			}
-//	//		}
-//	//	}
-//	//}
-//
-//	// Remove dead
-//	/*if (balls.size() > 0) {
-//		balls.erase(std::remove_if(balls.begin(), balls.end(),
-//			[](Ball* b) { return !b->isAlive; }), balls.end());
-//	}*/
-//}
+void Server::UpdateBalls() {
+	std::vector<Ball*> deletedBalls;
+	// Collisions
+	for (auto ball1 : balls) {
+		for (auto ball2 : balls) {
+			float dist = Distance(ball1->posX, ball1->posY, ball2->posX, ball2->posY);
+			if (dist < ball1->radius + ball2->radius) {
+				// One is a player
+				if (ball1->playerID != 0 || ball2->playerID != 0) {
+					// Mark food as dead
+					if (ball1->playerID == 0) {
+						deletedBalls.push_back(ball1);
+						ball2->radius += 10;
+					}
+					else if (ball2->playerID == 0) {
+						deletedBalls.push_back(ball2);
+						ball2->radius += 10;
+					}
+				}
+			}
+		}
+	}
+
+	// Remove dead
+	for (auto ball : deletedBalls) {
+		balls.erase(std::remove_if(balls.begin(), balls.end(),
+			[ball](Ball* b) { return b == ball; }), balls.end());
+		//delete ball;
+	}
+	deletedBalls.clear();
+}
 
 void Server::UpdateClients() {
 	if (elapsedUpdateT >= updateRateT) {
@@ -153,9 +157,12 @@ void Server::AddClient(CPeerENet* peer) {
 
 // TO DO: remove client by id, not by peer
 void Server::RemoveClient(CPeerENet* peer) {
+	// Remove from clients
 	clients.erase(std::remove_if(clients.begin(), clients.end(),
 		[peer](Client &c) { return c.peer == peer; }), clients.end());
-	pServer->Disconnect(peer);
+	
+	// Remove from balls
+	// ...
 }
 
 void Server::DeserializeMousePos(CPeerENet* peer, CBuffer* buffer) {

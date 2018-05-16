@@ -34,7 +34,7 @@ private:
 	CBuffer* SerializeWorld(MsgType msgType);
 	void SendWorld(CPeerENet* peer);
 	void SendID(CPeerENet* peer, size_t ID);
-	//void UpdateBalls();
+	void UpdateBalls();
 	void UpdateClients();
 	void DeserializeMousePos(CPeerENet* peer, CBuffer* buffer);
 	
