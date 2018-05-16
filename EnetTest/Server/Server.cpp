@@ -102,18 +102,31 @@ void Server::UpdateBalls() {
 	// Collisions
 	for (auto ball1 : balls) {
 		for (auto ball2 : balls) {
-			float dist = Distance(ball1->posX, ball1->posY, ball2->posX, ball2->posY);
-			if (dist < ball1->radius + ball2->radius) {
-				// One is a player
-				if (ball1->playerID != 0 || ball2->playerID != 0) {
-					// Mark food as dead
-					if (ball1->playerID == 0) {
-						deletedBalls.push_back(ball1);
-						ball2->radius += 10;
-					}
-					else if (ball2->playerID == 0) {
-						deletedBalls.push_back(ball2);
-						ball2->radius += 10;
+			if (ball1 != ball2)	{
+				float dist = Distance(ball1->posX, ball1->posY, ball2->posX, ball2->posY);
+				if (dist < ball1->radius + ball2->radius) {
+					// One is a player
+					if (ball1->playerID != 0 || ball2->playerID != 0) {
+						// Mark food as dead
+						if (ball1->playerID == 0) {
+							deletedBalls.push_back(ball1);
+							ball2->radius += 10;
+						}
+						else if (ball2->playerID == 0) {
+							deletedBalls.push_back(ball2);
+							ball2->radius += 10;
+						}
+						// Both are players
+						else if (ball1->playerID != 0 && ball2->playerID != 0) {
+							if (ball1->radius > ball2->radius) {
+								deletedBalls.push_back(ball2);
+								ball1->radius += 10;
+							}
+							else {
+								deletedBalls.push_back(ball1);
+								ball2->radius += 10;
+							}
+						}
 					}
 				}
 			}
@@ -122,9 +135,15 @@ void Server::UpdateBalls() {
 
 	// Remove dead
 	for (auto ball : deletedBalls) {
+		// If Client ball delete client
+		/*if (ball->playerID != 0) {
+			balls.erase(std::remove_if(balls.begin(), balls.end(),
+				[ball](Ball* b) { return b->playerID == ball->playerID; }), balls.end());
+		}*/
+
+		// Remove ball
 		balls.erase(std::remove_if(balls.begin(), balls.end(),
 			[ball](Ball* b) { return b == ball; }), balls.end());
-		//delete ball;
 	}
 	deletedBalls.clear();
 }
@@ -159,10 +178,16 @@ void Server::RemoveClient(CPeerENet* peer) {
 	auto client = std::find_if(clients.begin(), clients.end(),
 		[peer](Client &c) { return c.peer == peer; });
 	
+	// Client was already deleted
+	if (client == clients.end()) return;
+
 	size_t ID = client->ID;
 	auto ball = std::find_if(balls.begin(), balls.end(),
 		[ID](Ball *b) { return b->playerID == ID; });
 	
+	// Ball was already deleted
+	if (ball == balls.end()) return;
+
 	balls.erase(ball);
 	clients.erase(client);
 }
