@@ -8,6 +8,7 @@
     <ClCompile Include="ServerENet.cpp" />
     <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="Serializable.cpp" />
+    <ClCompile Include="AgarioSerialization.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClientENet.h" />
@@ -18,5 +19,6 @@
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="Serializable.h" />
     <ClInclude Include="Random.h" />
+    <ClInclude Include="AgarioSerialization.h" />
   </ItemGroup>
 </Project>

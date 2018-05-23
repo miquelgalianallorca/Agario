@@ -54,7 +54,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)/../enet-2.0/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/AgarioCommon;$(SolutionDir)/../enet-2.0/include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -83,6 +83,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AgarioSerialization.cpp" />
     <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="ClientENet.cpp" />
     <ClCompile Include="HostENet.cpp" />
@@ -92,6 +93,7 @@
     <ClCompile Include="ServerENet.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AgarioSerialization.h" />
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="ClientENet.h" />
     <ClInclude Include="HostENet.h" />

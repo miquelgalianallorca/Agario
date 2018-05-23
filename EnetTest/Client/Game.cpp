@@ -4,6 +4,7 @@
 #include "swalib\sys.h"
 #include "swalib\core.h"
 #include <iostream>
+#include "AgarioSerialization.h"
 
 #define PORT 1234
 #define CHANNELS 2
@@ -64,7 +65,9 @@ void Game::Update() {
 	// =============================================================
 
 	// Send messages ===============================================
-	CBuffer* buffer = SerializeMousePos();
+	CBuffer* buffer = new CBuffer();
+	ivec2 mousePos = SYS_MousePos();
+	AgarioSerialization::SerializeMousePos(*buffer, ID, (float)mousePos.x, (float)mousePos.y);
 	pClient->SendData(pPeer, buffer->GetBytes(), buffer->GetSize(), 0, false);
 	delete buffer;
 	// =============================================================
@@ -104,22 +107,4 @@ void Game::DeserializeWorld(CBuffer* buffer) {
         buffer->Read(&ball, sizeof(Ball));
         balls.push_back(ball);
     }
-}
-
-CBuffer* Game::SerializeMousePos() {
-	CBuffer* buffer = new CBuffer();
-
-	MsgType msgType = MsgType::MOVE;
-	buffer->Write(&msgType, sizeof(MsgType));
-
-	buffer->Write(&ID, sizeof(ID));
-
-	ivec2 mousePos = SYS_MousePos();
-	float posX = (float)mousePos.x;
-	float posY = (float)mousePos.y;
-	buffer->Write(&posX, sizeof(float));
-	buffer->Write(&posY, sizeof(float));
-
-	buffer->GotoStart();
-	return buffer;
 }

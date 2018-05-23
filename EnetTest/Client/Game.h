@@ -17,7 +17,6 @@ public:
 
 private:
     void DeserializeWorld(CBuffer* buffer);
-	CBuffer* SerializeMousePos();
 
 	CClienteENet* pClient;
 	CPeerENet*    pPeer;
