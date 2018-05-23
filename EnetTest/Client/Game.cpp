@@ -69,6 +69,15 @@ void Game::Update() {
 	delete buffer;
 	// =============================================================
 
+	// Check death =================================================
+	bool alive = false;
+	for (auto ball : balls) {
+		if (ball.playerID == ID)
+			alive = true;
+	}
+	if (!alive && balls.size() > 0) exit(0);
+	// =============================================================
+
 	Sleep(10);
 }
 
