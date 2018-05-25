@@ -18,12 +18,6 @@ struct Ball {
 		playerID(0)
 	{}
 
-	bool operator==(const Ball& other) { 
-		if (posX == other.posX && posY == other.posY && radius == other.radius && speed == other.speed && type == other.type && playerID == other.playerID)
-			return true;
-		else return false;
-	}
-	
 	float posX;
 	float posY;
 	float radius;
