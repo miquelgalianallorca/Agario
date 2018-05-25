@@ -44,7 +44,7 @@ bool Server::Init() {
 }
 
 void Server::Update() {
-	std::vector<CPacketENet*>  incomingPackets;
+	std::vector<CPacketENet*> incomingPackets;
 	pServer->Service(incomingPackets, 0);
 	
 	for (auto packet : incomingPackets)	{
@@ -76,26 +76,12 @@ void Server::Update() {
 	Sleep(DELTA_TIME);
 }
 
-CBuffer* Server::SerializeWorld(MsgType msgType) {
-	CBuffer* buffer = new CBuffer();
-
-	// Message type
-	buffer->Write(&msgType, sizeof(MsgType));
-
-	// Balls
-	size_t numBalls = balls.size();
-	buffer->Write(&numBalls, sizeof(size_t));
-	for (auto ball : balls)
-		buffer->Write(ball, sizeof(Ball));
-	
-	buffer->GotoStart();
-	return buffer;
-}
-
 void Server::SendWorld(CPeerENet* peer) {
 	// Snapshot of all entities (reliable)
-	CBuffer* buffer = SerializeWorld(MsgType::WORLD);
+	CBuffer* buffer = new CBuffer();
+	AgarioSerialization::SerializeWorld(*buffer, balls, MsgType::WORLD);
     pServer->SendData(peer, buffer->GetBytes(), buffer->GetSize(), 1, true);
+	delete buffer;
 }
 
 void Server::UpdateBalls() {
@@ -154,8 +140,10 @@ void Server::UpdateClients() {
 		elapsedUpdateT = 0;
 
 		// Snapshot of all entities (non reliable)
-		CBuffer* buffer = SerializeWorld(MsgType::UPDATE);
+		CBuffer* buffer = new CBuffer();
+		AgarioSerialization::SerializeWorld(*buffer, balls, MsgType::UPDATE);
 		pServer->SendAll(buffer->GetBytes(), buffer->GetSize(), 0, false);
+		delete buffer;
 	}
 	else elapsedUpdateT += DELTA_TIME;
 }

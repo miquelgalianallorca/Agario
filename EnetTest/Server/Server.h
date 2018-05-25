@@ -25,7 +25,6 @@ public:
 
 private:
 	CServerENet* pServer;
-	CBuffer* SerializeWorld(MsgType msgType);
 	std::vector<Ball*> balls;
 	std::vector<Client> clients;
 

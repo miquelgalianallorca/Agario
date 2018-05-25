@@ -20,5 +20,7 @@ public:
 
 	static void SerializeWorld(CBuffer& outBuffer, std::vector<Ball>& balls, MsgType msgType);
 	static void DeserializeWorld(CBuffer& buffer, std::vector<Ball>& outBalls);
+	static void SerializeWorld(CBuffer& outBuffer, std::vector<Ball*>& balls, MsgType msgType);
+	static void DeserializeWorld(CBuffer& buffer, std::vector<Ball*>& outBalls);
 };
 
