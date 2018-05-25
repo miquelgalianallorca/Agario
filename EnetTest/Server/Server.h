@@ -25,18 +25,18 @@ public:
 
 private:
 	CServerENet* pServer;
+	CBuffer* SerializeWorld(MsgType msgType);
 	std::vector<Ball*> balls;
 	std::vector<Client> clients;
 
 	void AddClient(CPeerENet* peer);
 	void RemoveClient(CPeerENet* peer);
 
-	CBuffer* SerializeWorld(MsgType msgType);
 	void SendWorld(CPeerENet* peer);
 	void SendID(CPeerENet* peer, size_t ID);
 	void UpdateBalls();
 	void UpdateClients();
-	void DeserializeMousePos(CPeerENet* peer, CBuffer* buffer);
+	void MovePlayerToMousePos(CBuffer* buffer);
 	
 	size_t updateRateT;
 	size_t elapsedUpdateT;

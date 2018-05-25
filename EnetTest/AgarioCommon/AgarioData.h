@@ -4,6 +4,8 @@
 #define STARTPOSX 320
 #define STARTPOSY 240
 
+#include <math.h>
+
 // =========================================================================
 //                Common data for both Server and Client
 // =========================================================================
@@ -15,6 +17,12 @@ struct Ball {
 		posX(_x), posY(_y), radius(_rad), speed(_speed), type(_type),
 		playerID(0)
 	{}
+
+	bool operator==(const Ball& other) { 
+		if (posX == other.posX && posY == other.posY && radius == other.radius && speed == other.speed && type == other.type && playerID == other.playerID)
+			return true;
+		else return false;
+	}
 	
 	float posX;
 	float posY;

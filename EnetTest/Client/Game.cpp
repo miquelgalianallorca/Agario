@@ -54,9 +54,10 @@ void Game::Update() {
 			else if (msgType == MsgType::UPDATE) {
 				balls.clear();
 				DeserializeWorld(buffer);
+				//AgarioSerialization::DeserializeWorld(*buffer, balls);
 			}
 			else if (msgType == MsgType::ID) {
-				buffer->Read(&ID, sizeof(size_t));
+				AgarioSerialization::DeserializeID(*buffer, ID);
 			}
 
 			delete buffer;

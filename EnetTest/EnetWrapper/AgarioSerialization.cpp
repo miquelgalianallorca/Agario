@@ -1,14 +1,6 @@
 #include "AgarioSerialization.h"
 #include "AgarioData.h"
-
-AgarioSerialization::AgarioSerialization()
-{
-}
-
-
-AgarioSerialization::~AgarioSerialization()
-{
-}
+#include "buffer.h"
 
 void AgarioSerialization::SerializeMousePos(CBuffer &buffer, size_t ID, float posX, float posY) {
 	MsgType msgType = MsgType::MOVE;
@@ -21,36 +13,45 @@ void AgarioSerialization::SerializeMousePos(CBuffer &buffer, size_t ID, float po
 	buffer.GotoStart();
 }
 
-void AgarioSerialization::DeserializeMousePos(CBuffer &buffer, size_t &outID, float &posX, float &posY) {
+void AgarioSerialization::DeserializeMousePos(CBuffer &buffer, size_t &outID, float &outPosX, float &outPosY) {
 	buffer.Read(&outID, sizeof(size_t));
-	//if (ID != 0)
-	//{
-	//	float destX = 0.f;
-	//	float destY = 0.f;
-	//	buffer->Read(&destX, sizeof(float));
-	//	buffer->Read(&destY, sizeof(float));
+	if (outID != 0)
+	{
+		buffer.Read(&outPosX, sizeof(float));
+		buffer.Read(&outPosY, sizeof(float));
+	}
+}
 
-	//	// Find that player
-	//	auto it = std::find_if(clients.begin(), clients.end(),
-	//		[ID](Client &c) { return c.ID == ID; });
-	//	float posX = it->ball->posX;
-	//	float posY = it->ball->posY;
+void AgarioSerialization::SerializeID(CBuffer &outBuffer, size_t ID) {
+	MsgType msgType = MsgType::ID;
+	outBuffer.Write(&msgType, sizeof(MsgType));
+	outBuffer.Write(&ID, sizeof(size_t));
+}
 
-	//	// Move him
-	//	if (Distance(destX, destY, posX, posY) > 10.f)
-	//	{
-	//		// Normalize direction
-	//		float velX = destX - posX;
-	//		float velY = destY - posY;
-	//		float length = sqrtf(velX * velX + velY * velY);
-	//		velX /= length;
-	//		velY /= length;
-	//		// Speed
-	//		velX += velX * it->ball->speed;
-	//		velY += velY * it->ball->speed;
+void AgarioSerialization::DeserializeID(CBuffer &buffer, size_t &outID) {
+	buffer.Read(&outID, sizeof(size_t));
+}
 
-	//		it->ball->posX += velX;
-	//		it->ball->posY += velY;
-	//	}
-	//}
+void AgarioSerialization::SerializeWorld(CBuffer& outBuffer, std::vector<Ball>& balls, MsgType msgType) {
+	// Message type
+	outBuffer.Write(&msgType, sizeof(MsgType));
+
+	// Balls
+	size_t numBalls = balls.size();
+	outBuffer.Write(&numBalls, sizeof(size_t));
+	for (auto ball : balls)
+		outBuffer.Write(&ball, sizeof(Ball));
+
+	outBuffer.GotoStart();
+}
+
+void AgarioSerialization::DeserializeWorld(CBuffer &buffer, std::vector<Ball>& outBalls) {
+	size_t numBalls;
+	buffer.Read(&numBalls, sizeof(size_t));
+	for (size_t i = 0; i<numBalls; ++i)
+	{
+		Ball ball(0, 0, 0, 0.f, BallType::FOOD);
+		buffer.Read(&ball, sizeof(Ball));
+		outBalls.push_back(ball);
+	}
 }

@@ -1,6 +1,7 @@
 #include "Server.h"
 #include "stdafx.h"
 #include "Buffer.h"
+#include "AgarioSerialization.h"
 
 #include <algorithm>
 #include <iostream>
@@ -59,7 +60,7 @@ void Server::Update() {
 			MsgType msgType;
 			buffer->Read(&msgType, sizeof(MsgType));
 			if (msgType == MsgType::MOVE) {
-				DeserializeMousePos(packet->GetPeer(), buffer);
+				MovePlayerToMousePos(buffer);
 			}
 
 			delete buffer;
@@ -192,15 +193,13 @@ void Server::RemoveClient(CPeerENet* peer) {
 	clients.erase(client);
 }
 
-void Server::DeserializeMousePos(CPeerENet* peer, CBuffer* buffer) {
-	size_t ID;
-	buffer->Read(&ID, sizeof(size_t));
-	if (ID != 0) {
-		float destX = 0.f;
-		float destY = 0.f;
-		buffer->Read(&destX, sizeof(float));
-		buffer->Read(&destY, sizeof(float));
+void Server::MovePlayerToMousePos(CBuffer* buffer) {
+	size_t ID   = 0;
+	float destX = 0.f;
+	float destY = 0.f;
+	AgarioSerialization::DeserializeMousePos(*buffer, ID, destX, destY);
 
+	if (ID != 0) {
 		// Find that player
 		auto it = std::find_if(clients.begin(), clients.end(),
 			[ID](Client &c) { return c.ID == ID; });
@@ -233,11 +232,7 @@ Server::Client::Client(CPeerENet* _peer, Ball* _ball, size_t _ID) :
 
 void Server::SendID(CPeerENet* peer, size_t ID) {
 	CBuffer* buffer = new CBuffer();
-
-	MsgType msgType = MsgType::ID;
-	buffer->Write(&msgType, sizeof(MsgType));
-	buffer->Write(&ID, sizeof(size_t));
-	
+	AgarioSerialization::SerializeID(*buffer, ID);
 	pServer->SendData(peer, buffer->GetBytes(), buffer->GetSize(), 1, true);
 	delete buffer;
 }
