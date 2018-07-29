@@ -18,7 +18,7 @@ Game::Game() :
 	pClient = new CClienteENet();
 	pClient->Init();
 	pPeer = pClient->Connect("127.0.0.1", PORT, CHANNELS);
-	pClient->SendData(pPeer, "pepe", 4, 0, false);
+	// pClient->SendData(pPeer, "pepe", 4, 0, false);
 	
 	ballTexture   = CORE_LoadPNG("../data/greyball.png", false);
 	playerTexture = CORE_LoadPNG("../data/greenball.png", false);

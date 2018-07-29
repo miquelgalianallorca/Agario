@@ -14,10 +14,17 @@
 #define DELTA_TIME 10
 #define INIT_PLAYER_SPEED 5
 
+#define NEW_BALL_RATE 100
+#define MAX_BALLS 200
+
 using std::cout;
 using std::endl;
 
-Server::Server() : updateRateT(20), elapsedUpdateT(0) {
+Server::Server() :
+	updateRateT(20),
+	elapsedUpdateT(0),
+	newballTimer(0)
+{
 	pServer = new CServerENet();
 
 	// Load starting balls
@@ -43,7 +50,9 @@ bool Server::Init() {
 	return pServer->Init(PORT, CLIENTS);
 }
 
-void Server::Update() {
+void Server::Update()
+{
+	// Receive messages
 	std::vector<CPacketENet*> incomingPackets;
 	pServer->Service(incomingPackets, 0);
 	
@@ -72,8 +81,25 @@ void Server::Update() {
 
 	// Write to all peers
 	UpdateBalls();
+	
+	// Add balls
+	/*++newballTimer;
+	if (newballTimer > NEW_BALL_RATE)
+	{
+		cout << "New ball" << endl;
+		if (balls.size() < MAX_BALLS)
+		{
+			float posX = (float)(std::rand() % 1000);
+			float posY = (float)(std::rand() % 1000);
+			balls.push_back(new Ball(posX, posY, BALLSIZE, 0.f, BallType::FOOD));
+		}
+
+		newballTimer = 0;
+	}*/
+	
 	UpdateClients();
 	Sleep(DELTA_TIME);
+
 }
 
 void Server::SendWorld(CPeerENet* peer) {
@@ -122,13 +148,6 @@ void Server::UpdateBalls() {
 
 	// Remove dead
 	for (auto ball : deletedBalls) {
-		// If Client ball delete client
-		/*if (ball->playerID != 0) {
-			balls.erase(std::remove_if(balls.begin(), balls.end(),
-				[ball](Ball* b) { return b->playerID == ball->playerID; }), balls.end());
-		}*/
-
-		// Remove ball
 		balls.erase(std::remove_if(balls.begin(), balls.end(),
 			[ball](Ball* b) { return b == ball; }), balls.end());
 	}

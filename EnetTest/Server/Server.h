@@ -39,4 +39,6 @@ private:
 	
 	size_t updateRateT;
 	size_t elapsedUpdateT;
+
+	size_t newballTimer;
 };
