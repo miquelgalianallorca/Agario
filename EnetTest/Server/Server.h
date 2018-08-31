@@ -36,6 +36,7 @@ private:
 	void UpdateBalls();
 	void UpdateClients();
 	void MovePlayerToMousePos(CBuffer* buffer);
+	bool SpawnBall();
 	
 	size_t updateRateT;
 	size_t elapsedUpdateT;

@@ -10,12 +10,14 @@
 #define PORT 1234
 #define CLIENTS 5
 
-#define STARTING_BALLS 20
+#define WORLD_WIDTH 640
+#define WORLD_HEIGHT 480
+#define STARTING_BALLS 10
 #define DELTA_TIME 10
 #define INIT_PLAYER_SPEED 5
 
 #define NEW_BALL_RATE 100
-#define MAX_BALLS 200
+#define MAX_BALLS 20
 
 using std::cout;
 using std::endl;
@@ -30,9 +32,7 @@ Server::Server() :
 	// Load starting balls
 	std::srand((unsigned int)std::time(nullptr));
 	for (size_t i = 0; i < STARTING_BALLS; ++i)	{
-		float posX = (float)(std::rand() % 1000);
-		float posY = (float)(std::rand() % 1000);
-		balls.push_back(new Ball(posX, posY, BALLSIZE, 0.f, BallType::FOOD));
+		SpawnBall();
 	}
 }
 
@@ -83,23 +83,26 @@ void Server::Update()
 	UpdateBalls();
 	
 	// Add balls
-	/*++newballTimer;
+	++newballTimer;
 	if (newballTimer > NEW_BALL_RATE)
 	{
-		cout << "New ball" << endl;
-		if (balls.size() < MAX_BALLS)
-		{
-			float posX = (float)(std::rand() % 1000);
-			float posY = (float)(std::rand() % 1000);
-			balls.push_back(new Ball(posX, posY, BALLSIZE, 0.f, BallType::FOOD));
-		}
-
+		SpawnBall();
 		newballTimer = 0;
-	}*/
+	}
 	
 	UpdateClients();
 	Sleep(DELTA_TIME);
+}
 
+bool Server::SpawnBall() {
+	// cout << "SPAWNED BALL" << endl;
+	if (balls.size() < MAX_BALLS) {
+		float posX = (float)(std::rand() % WORLD_WIDTH);
+		float posY = (float)(std::rand() % WORLD_HEIGHT);
+		balls.push_back(new Ball(posX, posY, BALLSIZE, 0.f, BallType::FOOD));	
+		return true;
+	}
+	return false;
 }
 
 void Server::SendWorld(CPeerENet* peer) {
@@ -117,27 +120,28 @@ void Server::UpdateBalls() {
 		for (auto ball2 : balls) {
 			if (ball1 != ball2)	{
 				float dist = Distance(ball1->posX, ball1->posY, ball2->posX, ball2->posY);
-				if (dist < Min(ball1->radius, ball2->radius)) {
-					// One is a player
+				// Radius is sprite size / 2
+				if (dist + ball1->size/2 <= ball2->size/2) {
+						// One is a player
 					if (ball1->playerID != 0 || ball2->playerID != 0) {
 						// Mark food as dead
 						if (ball1->playerID == 0) {
 							deletedBalls.push_back(ball1);
-							ball2->radius += 10;
+							ball2->size += 10;
 						}
 						else if (ball2->playerID == 0) {
 							deletedBalls.push_back(ball2);
-							ball2->radius += 10;
+							ball2->size += 10;
 						}
 						// Both are players
 						else if (ball1->playerID != 0 && ball2->playerID != 0) {
-							if (ball1->radius > ball2->radius) {
+							if (ball1->size > ball2->size) {
 								deletedBalls.push_back(ball2);
-								ball1->radius += 10;
+								ball1->size += 10;
 							}
 							else {
 								deletedBalls.push_back(ball1);
-								ball2->radius += 10;
+								ball2->size += 10;
 							}
 						}
 					}

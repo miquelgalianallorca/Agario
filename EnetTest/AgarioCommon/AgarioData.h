@@ -14,13 +14,13 @@ enum class BallType { FOOD, PLAYER };
 
 struct Ball {
 	Ball(float _x, float _y, float _rad, float _speed, BallType _type) :
-		posX(_x), posY(_y), radius(_rad), speed(_speed), type(_type),
+		posX(_x), posY(_y), size(_rad), speed(_speed), type(_type),
 		playerID(0)
 	{}
 
 	float posX;
 	float posY;
-	float radius;
+	float size;
 	float speed;
 	BallType type;
 	size_t playerID;

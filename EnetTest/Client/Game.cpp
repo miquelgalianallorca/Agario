@@ -1,8 +1,9 @@
 #include "Game.h"
 #include "stdafx.h"
 #include "Buffer.h"
-#include "swalib\sys.h"
-#include "swalib\core.h"
+#include "swalib/sys.h"
+#include "swalib/core.h"
+#include "swalib/font.h"
 #include <iostream>
 #include "AgarioSerialization.h"
 
@@ -23,15 +24,18 @@ Game::Game() :
 	ballTexture   = CORE_LoadPNG("../data/greyball.png", false);
 	playerTexture = CORE_LoadPNG("../data/greenball.png", false);
 	enemyTexture  = CORE_LoadPNG("../data/yellowball.png", false);
+
+	FONT_Init();
 }
 
 Game::~Game() {
 	pClient->Disconnect(pPeer);
-	delete pClient;
-
+	
 	CORE_UnloadPNG(ballTexture);
 	CORE_UnloadPNG(playerTexture);
 	CORE_UnloadPNG(enemyTexture);
+
+	FONT_End();
 }
 
 void Game::Update() {
@@ -96,8 +100,10 @@ void Game::Render() {
 		
 		// Draw
 		CORE_RenderCenteredRotatedSprite(vmake(ball.posX, ball.posY),
-			vmake(ball.radius, ball.radius), 0.f, texture);
+			vmake(ball.size, ball.size), 0.f, texture);
 	}
+
+	// FONT_DrawString(vmake(0.f, 0.f), "AAAAAAAAA");
 }
 
 void Game::DeserializeWorld(CBuffer* buffer) {
