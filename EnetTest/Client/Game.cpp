@@ -90,18 +90,28 @@ void Game::Update() {
 }
 
 void Game::Render() {
-	for (auto ball : balls) {
-		// Players in another color
-		unsigned int texture = ballTexture;
+	// Draw balls ==================================================
+	std::vector<Ball*> playerBalls;
+	unsigned int texture = ballTexture;
+	// Draw food balls
+	for (auto& ball : balls) {
 		if (ball.type == BallType::PLAYER) {
-			texture = enemyTexture;
-			if (ball.playerID == ID) texture = playerTexture;
+			playerBalls.push_back(&ball);
 		}
-		
-		// Draw
-		CORE_RenderCenteredRotatedSprite(vmake(ball.posX, ball.posY),
-			vmake(ball.size, ball.size), 0.f, texture);
+		else {
+			CORE_RenderCenteredRotatedSprite(vmake(ball.posX, ball.posY),
+				vmake(ball.size, ball.size), 0.f, ballTexture);
+		}
 	}
+	// Draw player's balls
+	for (auto ball : playerBalls) {
+		unsigned int texture = enemyTexture;
+		if (ball->playerID == ID) texture = playerTexture;
+		
+		CORE_RenderCenteredRotatedSprite(vmake(ball->posX, ball->posY),
+			vmake(ball->size, ball->size), 0.f, texture);
+	}
+	// =============================================================
 
 	// FONT_DrawString(vmake(0.f, 0.f), "AAAAAAAAA");
 }
