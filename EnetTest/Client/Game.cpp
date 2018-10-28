@@ -14,7 +14,8 @@ using std::cout;
 using std::endl;
 
 Game::Game() :
-	ID(0)
+	ID(0),
+	isDeadReckoningOn(true)
 {
 	pClient = new CClienteENet();
 	pClient->Init();
@@ -56,9 +57,9 @@ void Game::Update() {
 				DeserializeWorld(buffer);
 			}
 			else if (msgType == MsgType::UPDATE) {
-				balls.clear();
+				if (isDeadReckoningOn) ballsInterp.clear();
+				else                   balls.clear();
 				DeserializeWorld(buffer);
-				//AgarioSerialization::DeserializeWorld(*buffer, balls);
 			}
 			else if (msgType == MsgType::ID) {
 				AgarioSerialization::DeserializeID(*buffer, ID);
@@ -84,6 +85,10 @@ void Game::Update() {
 			alive = true;
 	}
 	if (!alive && balls.size() > 0) exit(0);
+	// =============================================================
+
+	// Dead reckoning ==============================================
+	if (isDeadReckoningOn) Interpolate();
 	// =============================================================
 
 	Sleep(10);
@@ -122,6 +127,16 @@ void Game::DeserializeWorld(CBuffer* buffer) {
     for (size_t i = 0; i<numBalls; ++i) {
         Ball ball(0, 0, 0, 0.f, BallType::FOOD);
         buffer->Read(&ball, sizeof(Ball));
-        balls.push_back(ball);
+
+		if (isDeadReckoningOn) ballsInterp.push_back(ball);
+		else                   balls.push_back(ball);
     }
+}
+
+void Game::Interpolate() {
+	
+	/*for (size_t i = 0; i < ballsInterp.size(); ++i) {
+		if ()
+	}*/
+
 }
