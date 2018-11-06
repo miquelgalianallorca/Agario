@@ -2,6 +2,7 @@
 
 #include "ClientENet.h"
 #include "AgarioData.h"
+#include <map>
 #include <Windows.h>
 
 using namespace ENet;
@@ -25,6 +26,7 @@ private:
 	size_t ID;
 	std::vector<Ball> balls;
 	std::vector<Ball> ballsInterp; // Dead reckoning
+	std::map<size_t, Ball*> map;
 
 	unsigned int ballTexture;      // Food balls
 	unsigned int playerTexture;    // Client ball
