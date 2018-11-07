@@ -57,8 +57,10 @@ void Game::Update() {
 				DeserializeWorld(buffer);
 			}
 			else if (msgType == MsgType::UPDATE) {
+				// Clear
 				ballsInterp.clear();
 				balls.clear();
+				// Deserialize
 				DeserializeWorld(buffer);
 			}
 			else if (msgType == MsgType::ID) {
@@ -81,14 +83,14 @@ void Game::Update() {
 	// Check death =================================================
 	bool alive = false;
 	for (auto ball : balls) {
-		if (ball.playerID == ID)
+		if (ball->playerID == ID)
 			alive = true;
 	}
 	if (!alive && balls.size() > 0) exit(0);
 	// =============================================================
 
 	// Dead reckoning ==============================================
-	if (isDeadReckoningOn) Interpolate();
+	// if (isDeadReckoningOn) Interpolate();
 	// =============================================================
 
 	Sleep(10);
@@ -100,12 +102,12 @@ void Game::Render() {
 	unsigned int texture = ballTexture;
 	// Draw food balls
 	for (auto& ball : balls) {
-		if (ball.type == BallType::PLAYER) {
-			playerBalls.push_back(&ball);
+		if (ball->type == BallType::PLAYER) {
+			playerBalls.push_back(ball);
 		}
 		else {
-			CORE_RenderCenteredRotatedSprite(vmake(ball.posX, ball.posY),
-				vmake(ball.size, ball.size), 0.f, ballTexture);
+			CORE_RenderCenteredRotatedSprite(vmake(ball->posX, ball->posY),
+				vmake(ball->size, ball->size), 0.f, ballTexture);
 		}
 	}
 	// Draw player's balls
@@ -125,18 +127,21 @@ void Game::DeserializeWorld(CBuffer* buffer) {
     size_t numBalls;
     buffer->Read(&numBalls, sizeof(size_t));
     for (size_t i = 0; i<numBalls; ++i) {
-        Ball ball(0, 0, 0, 0.f, BallType::FOOD);
-        buffer->Read(&ball, sizeof(Ball));
+        Ball* ball = new Ball(0, 0, 0, 0.f, BallType::FOOD);
+        buffer->Read(ball, sizeof(Ball));
 		balls.push_back(ball);
 
-		// Dead reckoning
-		if (isDeadReckoningOn && ball.playerID > 0) {
-			// Player wasn't in map
-			if (map.find(ball.playerID) == map.end()) {
-				map.insert(std::pair<size_t, Ball*>(ball.playerID, &ball));
+		// Dead reckoning ==============================================
+		if (isDeadReckoningOn) {
+			if (ball->playerID > 0) {
+				// Player wasn't in map
+				if (map.find(ball->playerID) == map.end()) {
+					map.insert(std::pair<size_t, Ball*>(ball->playerID, ball));
+				}
+				ballsInterp.push_back(ball);
 			}
-			ballsInterp.push_back(ball);
 		}
+		// =============================================================
     }
 }
 
@@ -144,12 +149,12 @@ void Game::Interpolate() {
 	// Advance balls in map to ballsInterp positions
 	for (auto& ballInterp : ballsInterp) {
 		// Player found
-		if (map.find(ballInterp.playerID) != map.end()) {
-			Ball* ball = map.at(ballInterp.playerID);
+		if (map.find(ballInterp->playerID) != map.end()) {
+			Ball* ball = map.at(ballInterp->playerID);
 			// Interpolate ball towards ballInterp
 			if (ball) {
-				ball->posX = ballInterp.posX; //delete
-				ball->posY = ballInterp.posY; //delete
+				ball->posX = ballInterp->posX; //delete
+				ball->posY = ballInterp->posY; //delete
 			}
 		}
 	}
