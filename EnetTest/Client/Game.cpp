@@ -129,19 +129,34 @@ void Game::DeserializeWorld(CBuffer* buffer) {
     for (size_t i = 0; i<numBalls; ++i) {
         Ball* ball = new Ball(0, 0, 0, 0.f, BallType::FOOD);
         buffer->Read(ball, sizeof(Ball));
-		balls.push_back(ball);
+		// balls.push_back(ball);
 
-		// Dead reckoning ==============================================
+		// Dead reckoning
 		if (isDeadReckoningOn) {
+			// Player ball
 			if (ball->playerID > 0) {
 				// Player wasn't in map
 				if (map.find(ball->playerID) == map.end()) {
 					map.insert(std::pair<size_t, Ball*>(ball->playerID, ball));
+					ballsInterp.push_back(ball);
+					balls.push_back(ball);
 				}
-				ballsInterp.push_back(ball);
+				// Player was in map
+				else {
+					Ball* prevBall = map.at(ball->playerID);
+					balls.push_back(prevBall);
+					ballsInterp.push_back(prevBall);
+				}
+			}
+			// Food ball
+			else {
+				balls.push_back(ball);
 			}
 		}
-		// =============================================================
+		// No dead reckoning
+		else {
+			balls.push_back(ball);
+		}
     }
 }
 
