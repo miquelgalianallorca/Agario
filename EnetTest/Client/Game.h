@@ -24,8 +24,8 @@ private:
 	CPeerENet*    pPeer;
 
 	size_t ID;
-	std::vector<Ball*> balls;
-	std::vector<Ball*> ballsInterp; // Dead reckoning - Player balls destinations
+	std::vector<Ball*> ballsFromServer;
+	std::vector<Ball*> ballsLocalPlayers; // Dead reckoning - Player balls destinations
 	std::map<size_t, Ball*> map;
 
 	unsigned int ballTexture;      // Food balls

@@ -58,8 +58,8 @@ void Game::Update() {
 			}
 			else if (msgType == MsgType::UPDATE) {
 				// Clear
-				ballsInterp.clear();
-				balls.clear();
+				ballsLocalPlayers.clear();
+				ballsFromServer.clear();
 				// Deserialize
 				DeserializeWorld(buffer);
 			}
@@ -86,11 +86,11 @@ void Game::Update() {
 
 	// Check death =================================================
 	bool alive = false;
-	for (auto ball : balls) {
+	for (auto ball : ballsFromServer) {
 		if (ball->playerID == ID)
 			alive = true;
 	}
-	if (!alive && balls.size() > 0) exit(0);
+	if (!alive && ballsFromServer.size() > 0) exit(0);
 	// =============================================================
 
 	Sleep(10);
@@ -101,7 +101,7 @@ void Game::Render() {
 	std::vector<Ball*> playerBalls;
 	unsigned int texture = ballTexture;
 	// Draw food balls
-	for (auto& ball : balls) {
+	for (auto& ball : ballsFromServer) {
 		if (ball->type == BallType::PLAYER) {
 			playerBalls.push_back(ball);
 		}
@@ -138,30 +138,26 @@ void Game::DeserializeWorld(CBuffer* buffer) {
 				if (map.find(ball->playerID) == map.end()) {
 					Ball* ballCopy = new Ball(*ball);
 					map.insert(std::pair<size_t, Ball*>(ballCopy->playerID, ballCopy));
-					ballsInterp.push_back(ballCopy);
+					ballsLocalPlayers.push_back(ballCopy);
 				}
-				else {
-					// Add player to balls
-					Ball* prevBall = map.at(ball->playerID);
-					balls.push_back(prevBall);
-				}
+				ballsFromServer.push_back(ball);
 			}
 			// Food ball
 			else {
-				balls.push_back(ball);
+				ballsFromServer.push_back(ball);
 			}
 		}
 
 		// No dead reckoning
 		else {
-			balls.push_back(ball);
+			ballsFromServer.push_back(ball);
 		}
     }
 }
 
 void Game::Interpolate() {
 	// Advance balls to ballsInterp positions
-	for (auto ball : balls) {
+	for (auto ball : ballsFromServer) {
 		// Player found
 		if (map.find(ball->playerID) != map.end()) {
 			Ball* ballCopy = map.at(ball->playerID);
@@ -172,7 +168,7 @@ void Game::Interpolate() {
 				vec2 dir = vsub(pos1, pos0);
 				float len = vlen(dir);
 				vec2 norm = vmake(dir.x / len, dir.y / len);
-				float speed = 10.f;
+				float speed = .1f;
 
 				ball->posX = pos0.x + norm.x * speed;// ballCopy->posX; //delete
 				ball->posY = pos0.y + norm.y * speed;// ballCopy->posY; //delete
