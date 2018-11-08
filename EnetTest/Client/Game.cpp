@@ -40,6 +40,11 @@ Game::~Game() {
 }
 
 void Game::Update() {
+
+	// Dead reckoning ==============================================
+	if (isDeadReckoningOn) Interpolate();
+	// =============================================================
+	
 	// Receive messages =============================================
 	std::vector<CPacketENet*> incomingPackets;
 	pClient->Service(incomingPackets, 0);
@@ -58,7 +63,6 @@ void Game::Update() {
 			}
 			else if (msgType == MsgType::UPDATE) {
 				// Clear
-				ballsLocalPlayers.clear();
 				ballsFromServer.clear();
 				// Deserialize
 				DeserializeWorld(buffer);
@@ -70,10 +74,6 @@ void Game::Update() {
 			delete buffer;
 		}
 	}
-	// =============================================================
-
-	// Dead reckoning ==============================================
-	if (isDeadReckoningOn) Interpolate();
 	// =============================================================
 
 	// Send messages ===============================================
@@ -101,26 +101,41 @@ void Game::Render() {
 	std::vector<Ball*> playerBalls;
 	unsigned int texture = ballTexture;
 	// Draw food balls
-	for (auto& ball : ballsFromServer) {
-		if (ball->type == BallType::PLAYER) {
-			playerBalls.push_back(ball);
+	if (!isDeadReckoningOn) {
+		for (auto& ball : ballsFromServer) {
+			if (ball->type == BallType::PLAYER) {
+				playerBalls.push_back(ball);
+			}
+			else {
+				CORE_RenderCenteredRotatedSprite(vmake(ball->posX, ball->posY),
+					vmake(ball->size, ball->size), 0.f, ballTexture);
+			}
 		}
-		else {
+		// Draw player's balls
+		for (auto ball : playerBalls) {
+			unsigned int texture = enemyTexture;
+			if (ball->playerID == ID) texture = playerTexture;
+
 			CORE_RenderCenteredRotatedSprite(vmake(ball->posX, ball->posY),
-				vmake(ball->size, ball->size), 0.f, ballTexture);
+				vmake(ball->size, ball->size), 0.f, texture);
 		}
 	}
-	// Draw player's balls
-	for (auto ball : playerBalls) {
-		unsigned int texture = enemyTexture;
-		if (ball->playerID == ID) texture = playerTexture;
-		
-		CORE_RenderCenteredRotatedSprite(vmake(ball->posX, ball->posY),
-			vmake(ball->size, ball->size), 0.f, texture);
+
+	else {
+		for (auto ball : ballsFromServer) {
+			if (ball->type == BallType::FOOD) {
+				CORE_RenderCenteredRotatedSprite(vmake(ball->posX, ball->posY),
+					vmake(ball->size, ball->size), 0.f, ballTexture);
+			}
+		}
+		for (auto ball : ballsLocalPlayers) {
+			unsigned int texture = enemyTexture;
+			if (ball->playerID == ID) texture = playerTexture;
+			CORE_RenderCenteredRotatedSprite(vmake(ball->posX, ball->posY),
+				vmake(ball->size, ball->size), 0.f, texture);
+		}
 	}
 	// =============================================================
-
-	// FONT_DrawString(vmake(0.f, 0.f), "AAAAAAAAA");
 }
 
 void Game::DeserializeWorld(CBuffer* buffer) {
@@ -134,8 +149,9 @@ void Game::DeserializeWorld(CBuffer* buffer) {
 		if (isDeadReckoningOn) {
 			// Player ball
 			if (ball->playerID > 0) {
-				// Player wasn't in map
-				if (map.find(ball->playerID) == map.end()) {
+				// Add to localPlayers if not beforehand
+				auto it = map.find(ball->playerID);
+				if (it == map.end()) {
 					Ball* ballCopy = new Ball(*ball);
 					map.insert(std::pair<size_t, Ball*>(ballCopy->playerID, ballCopy));
 					ballsLocalPlayers.push_back(ballCopy);
@@ -156,22 +172,26 @@ void Game::DeserializeWorld(CBuffer* buffer) {
 }
 
 void Game::Interpolate() {
-	// Advance balls to ballsInterp positions
-	for (auto ball : ballsFromServer) {
+	// Advance local balls to server positions
+	for (auto ballFromServer : ballsFromServer) {
 		// Player found
-		if (map.find(ball->playerID) != map.end()) {
-			Ball* ballCopy = map.at(ball->playerID);
+		if (map.find(ballFromServer->playerID) != map.end()) {
+			Ball* ballLocal = map.at(ballFromServer->playerID);
 			// Interpolate ball towards ballInterp
-			if (ballCopy) {
-				vec2 pos0 = vmake(ball->posX, ball->posY);
-				vec2 pos1 = vmake(ballCopy->posX, ballCopy->posY);
-				vec2 dir = vsub(pos1, pos0);
-				float len = vlen(dir);
-				vec2 norm = vmake(dir.x / len, dir.y / len);
-				float speed = .1f;
-
-				ball->posX = pos0.x + norm.x * speed;// ballCopy->posX; //delete
-				ball->posY = pos0.y + norm.y * speed;// ballCopy->posY; //delete
+			if (ballLocal) {
+				// Update size
+				ballLocal->size = ballFromServer->size;
+				// Update position
+				vec2 pos0 = vmake(ballFromServer->posX, ballFromServer->posY);
+				vec2 pos1 = vmake(ballLocal->posX, ballLocal->posY);
+				vec2 dir = vsub(pos0, pos1);
+				float len = vlen2(dir);
+				// Epsilon to stop interpolation in proximity
+				if (len > 3.f) {
+					vec2 norm = vmake(dir.x / len, dir.y / len);
+					ballLocal->posX = pos0.x + norm.x * ballLocal->speed;
+					ballLocal->posY = pos0.y + norm.y * ballLocal->speed;
+				}
 			}
 		}
 	}

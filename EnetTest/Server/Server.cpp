@@ -48,10 +48,10 @@ Server::~Server() {
 
 bool Server::Init() {
 	// No forced latency
-	return pServer->Init(PORT, CLIENTS);
+	// return pServer->Init(PORT, CLIENTS);
 
 	// Forced latency
-	// return pServer->Init(PORT, CLIENTS, 20, 20, 0.5f);
+	return pServer->Init(PORT, CLIENTS, 2, 2, 0.5f);
 }
 
 void Server::Update()
