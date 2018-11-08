@@ -72,6 +72,10 @@ void Game::Update() {
 	}
 	// =============================================================
 
+	// Dead reckoning ==============================================
+	if (isDeadReckoningOn) Interpolate();
+	// =============================================================
+
 	// Send messages ===============================================
 	CBuffer* buffer = new CBuffer();
 	ivec2 mousePos = SYS_MousePos();
@@ -87,10 +91,6 @@ void Game::Update() {
 			alive = true;
 	}
 	if (!alive && balls.size() > 0) exit(0);
-	// =============================================================
-
-	// Dead reckoning ==============================================
-	// if (isDeadReckoningOn) Interpolate();
 	// =============================================================
 
 	Sleep(10);
@@ -129,7 +129,6 @@ void Game::DeserializeWorld(CBuffer* buffer) {
     for (size_t i = 0; i<numBalls; ++i) {
         Ball* ball = new Ball(0, 0, 0, 0.f, BallType::FOOD);
         buffer->Read(ball, sizeof(Ball));
-		// balls.push_back(ball);
 
 		// Dead reckoning
 		if (isDeadReckoningOn) {
@@ -137,15 +136,14 @@ void Game::DeserializeWorld(CBuffer* buffer) {
 			if (ball->playerID > 0) {
 				// Player wasn't in map
 				if (map.find(ball->playerID) == map.end()) {
-					map.insert(std::pair<size_t, Ball*>(ball->playerID, ball));
-					ballsInterp.push_back(ball);
-					balls.push_back(ball);
+					Ball* ballCopy = new Ball(*ball);
+					map.insert(std::pair<size_t, Ball*>(ballCopy->playerID, ballCopy));
+					ballsInterp.push_back(ballCopy);
 				}
-				// Player was in map
 				else {
+					// Add player to balls
 					Ball* prevBall = map.at(ball->playerID);
 					balls.push_back(prevBall);
-					ballsInterp.push_back(prevBall);
 				}
 			}
 			// Food ball
@@ -153,6 +151,7 @@ void Game::DeserializeWorld(CBuffer* buffer) {
 				balls.push_back(ball);
 			}
 		}
+
 		// No dead reckoning
 		else {
 			balls.push_back(ball);
@@ -161,15 +160,22 @@ void Game::DeserializeWorld(CBuffer* buffer) {
 }
 
 void Game::Interpolate() {
-	// Advance balls in map to ballsInterp positions
-	for (auto& ballInterp : ballsInterp) {
+	// Advance balls to ballsInterp positions
+	for (auto ball : balls) {
 		// Player found
-		if (map.find(ballInterp->playerID) != map.end()) {
-			Ball* ball = map.at(ballInterp->playerID);
+		if (map.find(ball->playerID) != map.end()) {
+			Ball* ballCopy = map.at(ball->playerID);
 			// Interpolate ball towards ballInterp
-			if (ball) {
-				ball->posX = ballInterp->posX; //delete
-				ball->posY = ballInterp->posY; //delete
+			if (ballCopy) {
+				vec2 pos0 = vmake(ball->posX, ball->posY);
+				vec2 pos1 = vmake(ballCopy->posX, ballCopy->posY);
+				vec2 dir = vsub(pos1, pos0);
+				float len = vlen(dir);
+				vec2 norm = vmake(dir.x / len, dir.y / len);
+				float speed = 10.f;
+
+				ball->posX = pos0.x + norm.x * speed;// ballCopy->posX; //delete
+				ball->posY = pos0.y + norm.y * speed;// ballCopy->posY; //delete
 			}
 		}
 	}
